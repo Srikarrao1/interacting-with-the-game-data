@@ -9,7 +9,31 @@ import (
 	"strings"
 )
 
+const data = `
+[
+        {
+                "id": 1,
+                "name": "god of war",
+                "genre": "action adventure",
+                "price": 50
+        },
+        {
+                "id": 2,
+                "name": "x-com 2",
+                "genre": "strategy",
+                "price": 40
+        },
+        {
+                "id": 3,
+                "name": "minecraft",
+                "genre": "sandbox",
+                "price": 20
+        }
+]`
+
 func main() {
+
+
 	type item struct {
 		id    int
 		name  string
@@ -20,22 +44,44 @@ func main() {
 		item
 		genre string
 	}
-
-	games := []game{
-		{
-			item:  item{id: 1, name: "god of war", price: 50},
-			genre: "action adventure",
-		},
-		{item: item{id: 2, name: "x-com2", price: 30}, genre: "strategy"},
-		{item: item{id: 3, name: "minecraft", price: 20}, genre: "sandbox"},
+	type jsonGame struct {
+		ID    int    `json:"id"`
+		Name  string `json:"name"`
+		Genre string `json:"genre"`
+		Price int    `json:"price"`
 	}
+
+	
+	var decodable []jsonGame
+
+			if err := json.Unmarshal([]byte(data), &decodable); err != nil {
+				fmt.Println("Sorry there's a problem:", err)
+				return
+			}	
+
+	var games []game
+
+	for _, dg := range decodable {
+		games = append(games, game{item{dg.ID, dg.Name, dg.Price}, dg.Genre})
+	}
+	
+	
+
+	// games := []game{
+	// 	{
+	// 		item:  item{id: 1, name: "god of war", price: 50},
+	// 		genre: "action adventure",
+	// 	},
+	// 	{item: item{id: 2, name: "x-com2", price: 30}, genre: "strategy"},
+	// 	{item: item{id: 3, name: "minecraft", price: 20}, genre: "sandbox"},
+	// }
 
 	byID := make(map[int]game)
 	for _, g := range games {
 		byID[g.id] = g
 	}
 
-	fmt.Printf("Inanc's game store has %d games.\n\n", len(games))
+	fmt.Printf("srikar's game store has %d games.\n\n", len(games))
 
 	in := bufio.NewScanner(os.Stdin)
 
@@ -82,28 +128,23 @@ func main() {
 				fmt.Printf("sory no id for this game")
 			}
 		case "save":
-			type jsonGame struct {
-				ID    int    `json:"id"`
-				Name  string `json:"name"`
-				Genre string `json:"genre"`
-				Price int    `json:"price"`
-			}
 
 			// load the data into the encodable game values
-			var encodable []jsonGame
-			for _, g := range games {
-				encodable = append(encodable,
-					jsonGame{g.id, g.name, g.genre, g.price})
-			}
 
-			out, err := json.MarshalIndent(encodable, "", "\t")
-			if err != nil {
-				fmt.Println("Sorry:", err)
-				continue
-			}
+			
 
-			fmt.Println(string(out))
-			return
+			var encodable []jsonGame 
+				for _, g := range games {
+					encodable = append(encodable, jsonGame{g.id, g.name, g.genre, g.price})
+			
+				}
+				out, err := json.MarshalIndent(encodable, "", "\t")
+				if err != nil {
+					fmt.Println("Error:", err)
+					continue
+				}
+				fmt.Println(string(out))
+				return
 		}
 	}
 
