@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"encoding/json"
 	"strconv"
 	"strings"
 )
@@ -42,6 +43,7 @@ func main() {
 		fmt.Printf(`
 		> list : lists all the games
 		> id   : queries all the games listed
+		> save : exports the data to json and quits
 		> quit : quits
 		`)
 
@@ -79,6 +81,29 @@ func main() {
 			} else {
 				fmt.Printf("sory no id for this game")
 			}
+		case "save":
+			type jsonGame struct {
+				ID    int    `json:"id"`
+				Name  string `json:"name"`
+				Genre string `json:"genre"`
+				Price int    `json:"price"`
+			}
+
+			// load the data into the encodable game values
+			var encodable []jsonGame
+			for _, g := range games {
+				encodable = append(encodable,
+					jsonGame{g.id, g.name, g.genre, g.price})
+			}
+
+			out, err := json.MarshalIndent(encodable, "", "\t")
+			if err != nil {
+				fmt.Println("Sorry:", err)
+				continue
+			}
+
+			fmt.Println(string(out))
+			return
 		}
 	}
 
