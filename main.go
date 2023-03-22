@@ -1,55 +1,85 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	
-
+	"os"
+	"strconv"
+	"strings"
 )
 
 func main() {
-	phones := map[string]string {
-		"bowen": "202-555-0179",
-		"dulin": "03.37.77.63.06",
-		"greco": "034989698793",
-	}
-	products := map[int]bool {
-		617841573: true,
-		879401371: false,
-		576872813: true,
+	type item struct {
+		id    int
+		name  string
+		price int
 	}
 
-	multiPhones := map[string][]string {
-		"bowen": {"202-555-0179"},
-		"dulin": {"03.37.77.63.06", "03.37.70.50.05", "02.20.40.10.04"},
-		"greco": {"03489940240", "03489900120"},
-	}
-	basket := map[int]map[int]int {
-		100: {617841573: 4, 576872813: 2},
-		101: {576872813: 5, 657473833: 20},
-		102: {},
+	type game struct {
+		item
+		genre string
 	}
 
-	who, phone := "dulin", "N/A"
-
-	if v, ok := phones[who]; ok {
-		phone = v
+	games := []game{
+		{
+			item:  item{id: 1, name: "god of war", price: 50},
+			genre: "action adventure",
+		},
+		{item: item{id: 2, name: "x-com2", price: 30}, genre: "strategy"},
+		{item: item{id: 3, name: "minecraft", price: 20}, genre: "sandbox"},
 	}
-	fmt.Printf("%s's phone number is %s\n", who, phone)
 
-	id, status := 879401371, "Available"
-
-	if !products[id] {
-		status = "Not" + status
+	byID := make(map[int]game)
+	for _, g := range games {
+		byID[g.id] = g
 	}
-	fmt.Printf("Product ID #%d is %s\n", id, status)
 
-	who, phone = "greco", "N/A"
+	fmt.Printf("Inanc's game store has %d games.\n\n", len(games))
 
-	if phones := multiPhones[who]; len(phones) >= 2 {
-		phone = phones[1]
+	in := bufio.NewScanner(os.Stdin)
+
+	for {
+		fmt.Printf(`
+		> list : lists all the games
+		> id   : queries all the games listed
+		> quit : quits
+		`)
+
+		if !in.Scan() {
+			break
+		}
+
+		cmd := strings.Fields(in.Text())
+
+		if len(cmd) == 0 {
+			continue
+		}
+
+		switch cmd[0] {
+		case "quit":
+			fmt.Println("bye!")
+		case "list":
+			for _, g := range games {
+				fmt.Printf("#%d: %-15q %-20s $%d\n", g.id, g.name, "("+g.genre+")", g.price)
+			}
+		case "id":
+			if len(cmd) != 2 {
+				fmt.Println("wrong id")
+				continue
+			}
+			id, err := strconv.Atoi(cmd[1])
+			if err != nil {
+				fmt.Println("wrong id")
+				continue
+			}
+			g, ok := byID[id]
+
+			if ok {
+				fmt.Printf("#%d: %-15q %-20s $%d", g.id, g.name, "("+g.genre+")", g.price)
+			} else {
+				fmt.Printf("sory no id for this game")
+			}
+		}
 	}
-	fmt.Printf("%s's second phone number is %s", who, phone )
 
-	cid, pid := 101, 576872813
-	fmt.Printf("Customer #%d is going to buy %d from product ID #%d.\n", cid, basket[cid][pid], pid)
 }
