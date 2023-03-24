@@ -9,61 +9,21 @@ import (
 	"strings"
 )
 
-const data = `
-[
-        {
-                "id": 1,
-                "name": "god of war",
-                "genre": "action adventure",
-                "price": 50
-        },
-        {
-                "id": 2,
-                "name": "x-com 2",
-                "genre": "strategy",
-                "price": 40
-        },
-        {
-                "id": 3,
-                "name": "minecraft",
-                "genre": "sandbox",
-                "price": 20
-        }
-]`
+
 
 func main() {
 
 
-	type item struct {
-		id    int
-		name  string
-		price int
-	}
-
-	type game struct {
-		item
-		genre string
-	}
-	type jsonGame struct {
-		ID    int    `json:"id"`
-		Name  string `json:"name"`
-		Genre string `json:"genre"`
-		Price int    `json:"price"`
-	}
 
 	
-	var decodable []jsonGame
+	// var decodable []jsonGame
 
-			if err := json.Unmarshal([]byte(data), &decodable); err != nil {
-				fmt.Println("Sorry there's a problem:", err)
-				return
-			}	
+	// 		if err := json.Unmarshal([]byte(data), &decodable); err != nil {
+	// 			fmt.Println("Sorry there's a problem:", err)
+	// 			return
+	// 		}	
 
-	var games []game
-
-	for _, dg := range decodable {
-		games = append(games, game{item{dg.ID, dg.Name, dg.Price}, dg.Genre})
-	}
+	
 	
 	
 
@@ -76,10 +36,9 @@ func main() {
 	// 	{item: item{id: 3, name: "minecraft", price: 20}, genre: "sandbox"},
 	// }
 
-	byID := make(map[int]game)
-	for _, g := range games {
-		byID[g.id] = g
-	}
+	games := load()
+	
+	byID := indexByID(games)
 
 	fmt.Printf("srikar's game store has %d games.\n\n", len(games))
 
@@ -122,11 +81,11 @@ func main() {
 			}
 			g, ok := byID[id]
 
-			if ok {
-				fmt.Printf("#%d: %-15q %-20s $%d", g.id, g.name, "("+g.genre+")", g.price)
-			} else {
-				fmt.Printf("sory no id for this game")
+			if !ok {
+				fmt.Println("sorry no Id for the game")
+				continue
 			}
+			printGame(g)
 		case "save":
 
 			// load the data into the encodable game values
